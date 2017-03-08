@@ -1,0 +1,198 @@
+#VRML_SIM V8.5 utf8
+DEF WORLD WorldInfo {
+  inkEvaporation 0.5
+}
+Viewpoint {
+  orientation 0.99336585 0.10267943 -0.051780445 5.0346833
+  position -0.39372321 3.3501965 1.7449096
+}
+RectangleArena {
+  translation 0 -5e-05 0
+  floorSize 1.4 1.4
+}
+Background {
+  skyColor [
+    0.4 0.7 1
+  ]
+}
+DEF ROBOT E-puck {
+  translation 0 0.01 0.54
+  controller "advanced_genetic_algorithm"
+  emitter_channel 2
+  groundSensorsSlot [
+    DEF PEN_L Pen {
+      translation 2.1932798e-09 -0.0039999999 0.07
+      rotation -0.57735027 0.57735027 0.57735027 2.0943951
+      name "pen_l"
+      inkColor 0 0.7 0
+      inkDensity 1
+      leadSize 0.08
+      maxDistance 0.001
+    }
+  ]
+}
+DEF GA Supervisor {
+  translation 0.1 0 0.1
+  children [
+    Emitter {
+      channel 1
+    }
+    Display {
+      width 200
+      height 100
+    }
+  ]
+  controller "advanced_genetic_algorithm_supervisor"
+}
+Solid {
+  translation -0.12 0.05 -0.35
+  children [
+    Shape {
+      appearance Appearance {
+      }
+      geometry Box {
+        size 0.05 0.1 0.5
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.05 0.1 0.5
+  }
+}
+Solid {
+  translation 1.0408341e-17 0.05 -0.62
+  children [
+    Shape {
+      appearance Appearance {
+      }
+      geometry Box {
+        size 0.29 0.1 0.05
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.29 0.1 0.05
+  }
+}
+Solid {
+  translation 1.0408341e-17 0.05 0.62
+  children [
+    Shape {
+      appearance Appearance {
+      }
+      geometry Box {
+        size 0.29 0.1 0.05
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.29 0.1 0.05
+  }
+}
+DEF FLOOR_WALLED Solid {
+  translation 0 -0.05 0
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.7 0.7 0.7
+        }
+        texture ImageTexture {
+        }
+      }
+      geometry Box {
+        size 0.2 0.1 1.2
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.2 0.1 1.2
+  }
+}
+DEF FLOOR_EXP Solid {
+  translation 0.4 -0.05 0
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+        }
+        texture ImageTexture {
+        }
+      }
+      geometry Box {
+        size 0.6 0.1 0.2
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.6 0.1 0.2
+  }
+}
+DEF FLOOR_EXP Solid {
+  translation -0.4 -0.05 0
+  children [
+    Shape {
+      appearance Appearance {
+        material Material {
+        }
+        texture ImageTexture {
+        }
+      }
+      geometry Box {
+        size 0.6 0.1 0.2
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.6 0.1 0.2
+  }
+}
+Solid {
+  translation 0.12 0.05 -0.35
+  children [
+    Shape {
+      appearance Appearance {
+      }
+      geometry Box {
+        size 0.05 0.1 0.5
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.05 0.1 0.5
+  }
+}
+Solid {
+  translation 0.12 0.05 0.35
+  children [
+    Shape {
+      appearance Appearance {
+      }
+      geometry Box {
+        size 0.05 0.1 0.5
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.05 0.1 0.5
+  }
+}
+Solid {
+  translation -0.12 0.05 0.35
+  children [
+    Shape {
+      appearance Appearance {
+      }
+      geometry Box {
+        size 0.05 0.1 0.5
+      }
+    }
+  ]
+  boundingObject Box {
+    size 0.05 0.1 0.5
+  }
+}
+DirectionalLight {
+  ambientIntensity 1
+  direction 0.1 -0.5 0.3
+}
