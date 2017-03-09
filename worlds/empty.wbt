@@ -4,7 +4,7 @@ DEF WORLD WorldInfo {
 }
 Viewpoint {
   orientation 0.99336585 0.10267943 -0.051780445 5.0346833
-  position -0.39372321 3.3501965 1.7449096
+  position -0.38842172 3.3126531 1.7321666
 }
 RectangleArena {
   translation 0 -5e-05 0

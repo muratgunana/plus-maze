@@ -6,9 +6,6 @@ int random_get_integer(int max) {
   return rand() % max;
 }
 
-int random_get_range(int start, int end) {
-  
-}
 double random_get_uniform() {
   return (double)rand() / RAND_MAX;
 }

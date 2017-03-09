@@ -5,18 +5,16 @@
 #include <webots/receiver.h>
 #include <webots/distance_sensor.h>
 #include <assert.h>
-#include <string.h> 
+#include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-static const int NEURON_INPUTS = 3;
-static const int NUMBER_OF_NEURONS = 6;
+
 #define NUM_SENSORS 8
-static double **weights;
+#define NUM_WHEELS 2
+#define GENOTYPE_SIZE (NUM_SENSORS * NUM_WHEELS)
 
-#define GENOTYPE_SIZE (NEURON_INPUTS*NUMBER_OF_NEURONS)
-
-double inputs[2];
+// sensor to wheels multiplication matrix
+// each each sensor has a weight for each wheel
+double matrix[NUM_SENSORS][NUM_WHEELS];
 
 WbDeviceTag sensors[NUM_SENSORS];  // proximity sensors
 WbDeviceTag receiver;              // for receiving genes from Supervisor
@@ -31,68 +29,45 @@ void check_for_new_genes() {
     // copy new genes directly in the sensor/actuator matrix
     // we don't use any specific mapping nor left/right symmetry
     // it's the GA's responsability to find a functional mapping
-    memcpy(weights, wb_receiver_get_data(receiver), GENOTYPE_SIZE * sizeof(double));
+    memcpy(matrix, wb_receiver_get_data(receiver), GENOTYPE_SIZE * sizeof(double));
 
     // prepare for receiving next genes packet
     wb_receiver_next_packet(receiver);
   }
 }
 
-// sguash the ANN output between -1 and 1.
-double hyperbolic_tangent(double value) {
-  return (1.0f - exp(- 2.0f * value)) / (1.0f + exp(-2.0f * value));
+static double clip_value(double value, double min_max) {
+  if (value > min_max)
+    return min_max;
+  else if (value < -min_max)
+    return -min_max;
+
+  return value;
 }
 
-// Calculate the output based on weights evolved by GA.
-double* evolve_neural_net() {
- 
-  int input_size = sizeof(inputs) / sizeof(double);
-  int i,j, k;
-  double* h;
-  h = malloc(input_size);
-  memcpy(h, inputs, input_size);
-  
-  for (i = 0; i < input_size; ++i) {
-    h[i] = hyperbolic_tangent(h[i]);
-  }
-  
-  for (i = 0; i < NUMBER_OF_NEURONS; ++i) {
-    for (k = 0; k < input_size; ++k) {
-      double output = 0.0;
-      for (j = 0; j < NEURON_INPUTS; ++j) {
-        
-        if (j == 0) {
-          output += weights[i][j];
-        }
-        else {
-          output += weights[i][j] * h[j-1];
-        }
-      }
-      
-      h[k] = output;
-    }
-  }
-  
-  for (i = 0; i < input_size; ++i) {
-    h[i] = hyperbolic_tangent(h[i]);
-  }
-  return h;
-}
-
-// Get input, evolve NN and move based on output
 void sense_compute_and_actuate() {
   // read sensor values
   double sensor_values[NUM_SENSORS];
-  int i;
+  int i, j;
   for (i = 0; i < NUM_SENSORS; i++)
     sensor_values[i] = wb_distance_sensor_get_value(sensors[i]);
-  inputs[0] = sensor_values[0];
-  inputs[1] = sensor_values[7];
-  
-  double * wheel_speeds = evolve_neural_net();
+
+  // compute actuation using Braitenberg's algorithm:
+  // The speed of each wheel is computed by summing the value
+  // of each sensor multiplied by the corresponding weight of the matrix.
+  // By chance, in this case, this works without any scaling of the sensor values nor of the
+  // wheels speed but this type of scaling may be necessary with a different problem
+  double wheel_speed[NUM_WHEELS] = { 0.0, 0.0 };
+  for (i = 0; i < NUM_WHEELS; i++)
+    for (j = 0; j < NUM_SENSORS; j++)
+      wheel_speed[i] += matrix[j][i] * sensor_values[j];
+
+  // clip to e-puck max speed values to avoid warning
+  wheel_speed[0] = clip_value(wheel_speed[0], 1000.0);
+  wheel_speed[1] = clip_value(wheel_speed[1], 1000.0);
 
   // actuate e-puck wheels
-  wb_differential_wheels_set_speed(wheel_speeds[0], wheel_speeds[1]);
+  wb_differential_wheels_set_speed(wheel_speed[0], wheel_speed[1]);
 }
 
 int main(int argc, const char *argv[]) {
@@ -108,12 +83,17 @@ int main(int argc, const char *argv[]) {
   for (i = 0; i < NUM_SENSORS; i++) {
     sprintf(name, "ps%d", i);
     sensors[i] = wb_robot_get_device(name);
+    printf("Sensor %d : %d", i, sensors[i]);
     wb_distance_sensor_enable(sensors[i], time_step);
   }
 
   // find and enable receiver
   receiver = wb_robot_get_device("receiver");
   wb_receiver_enable(receiver, time_step);
+
+  // initialize matrix to zero, hence the robot
+  // wheels will initially be stopped
+  memset(matrix, 0.0, sizeof(matrix));
 
   // run until simulation is restarted
   while (wb_robot_step(time_step) != -1) {

@@ -28,7 +28,7 @@ Genotype genotype_create() {
   gen->fitness = 0.0;
   gen->genes = malloc(genotype_size * sizeof(double));
 
-  // initialize with random uniform numbers in the range [-1,1]
+  // initialize with random uniform numbers in the range [0,1]
   int i;
   for (i = 0; i < genotype_size; i++)
     gen->genes[i] = random_get_uniform();
