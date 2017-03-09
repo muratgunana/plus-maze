@@ -9,10 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-static const int NEURON_INPUTS = 3;
-static const int NUMBER_OF_NEURONS = 6;
+
 #define NUM_SENSORS 8
-static double **weights;
+
+#define NEURON_INPUTS 3
+#define NUMBER_OF_NEURONS 6
+#define MAX_SPEED 1000
+double weights[NUMBER_OF_NEURONS][NEURON_INPUTS];
 
 #define GENOTYPE_SIZE (NEURON_INPUTS*NUMBER_OF_NEURONS)
 
@@ -21,36 +24,61 @@ double inputs[2];
 WbDeviceTag sensors[NUM_SENSORS];  // proximity sensors
 WbDeviceTag receiver;              // for receiving genes from Supervisor
 
+
 // check if a new set of genes was sent by the Supervisor
 // in this case start using these new genes immediately
 void check_for_new_genes() {
-  if (wb_receiver_get_queue_length(receiver) > 0) {
-    // check that the number of genes received match what is expected
-    assert(wb_receiver_get_data_size(receiver) == GENOTYPE_SIZE * sizeof(double));
-
+  if(wb_receiver_get_data_size(receiver) == GENOTYPE_SIZE * sizeof(double)) {
+    const double* genes = wb_receiver_get_data(receiver);
+    int m,n;
+  
+    // Copy genes as an array in nn_weights format.
+    for (m = 0; m < NUMBER_OF_NEURONS; ++m) {
+      for (n = 0; n < NEURON_INPUTS; ++n) {
+        weights[m][n] = genes[NEURON_INPUTS * m + n];
+        #ifdef DEBUG
+        printf("Gene: %f\n",  weights[m][n]);
+        #endif
+      }
+    }
+ 
+  }
+  
+   // printf("Size received: %d \n", GENOTYPE_SIZE * sizeof(double));
+    
     // copy new genes directly in the sensor/actuator matrix
     // we don't use any specific mapping nor left/right symmetry
     // it's the GA's responsability to find a functional mapping
-    memcpy(weights, wb_receiver_get_data(receiver), GENOTYPE_SIZE * sizeof(double));
+//   memcpy(weights,nn_weights, 18);
 
     // prepare for receiving next genes packet
-    wb_receiver_next_packet(receiver);
-  }
+    wb_receiver_next_packet(receiver); 
 }
 
 // sguash the ANN output between -1 and 1.
 double hyperbolic_tangent(double value) {
+  printf("Value: %f\n", value);
   return (1.0f - exp(- 2.0f * value)) / (1.0f + exp(-2.0f * value));
 }
 
 // Calculate the output based on weights evolved by GA.
 double* evolve_neural_net() {
- 
+  
   int input_size = sizeof(inputs) / sizeof(double);
   int i,j, k;
   double* h;
   h = malloc(input_size);
   memcpy(h, inputs, input_size);
+  
+  int m,n;
+  // Copy genes as an array in nn_weights format.
+  for (m = 0; m < NUMBER_OF_NEURONS; ++m) {
+    for (n = 0; n < NEURON_INPUTS; ++n) {
+      #ifdef DEBUG
+      printf("Gene [%i,%i]: %f\n",  m,n,weights[m][n]);
+      #endif 
+    }
+  }
   
   for (i = 0; i < input_size; ++i) {
     h[i] = hyperbolic_tangent(h[i]);
@@ -75,6 +103,7 @@ double* evolve_neural_net() {
   
   for (i = 0; i < input_size; ++i) {
     h[i] = hyperbolic_tangent(h[i]);
+    printf("H[%i]: %f\n", i , h[i]);
   }
   return h;
 }
@@ -90,15 +119,15 @@ void sense_compute_and_actuate() {
   inputs[1] = sensor_values[7];
   
   double * wheel_speeds = evolve_neural_net();
-
+  
   // actuate e-puck wheels
-  wb_differential_wheels_set_speed(wheel_speeds[0], wheel_speeds[1]);
+  wb_differential_wheels_set_speed(wheel_speeds[0]*MAX_SPEED, wheel_speeds[1]*MAX_SPEED);
 }
 
 int main(int argc, const char *argv[]) {
 
   wb_robot_init();  // initialize Webots
-
+  memset(weights, 0.0, sizeof(weights));
   // find simulation step in milliseconds (WorldInfo.basicTimeStep)
   int time_step = wb_robot_get_basic_time_step();
 

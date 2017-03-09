@@ -8,20 +8,18 @@
 #include <webots/emitter.h>
 #include <webots/pen.h>
 #include <webots/display.h>
-#include <webots/keyboard.h>
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
-
-static const int POPULATION_SIZE = 30;
+static const int POPULATION_SIZE = 10;
 static const int NUM_GENERATIONS = 3;
 
 static bool walled_maze[12];
 static bool unwalled_maze[12];
 
 // must match the values in the advanced_genetic_algorithm.c code
-static const int NUM_SENSORS = 8;
-static const int NUM_WHEELS  = 2;
+static const int NUM_SENSORS = 6;
+static const int NUM_WHEELS  = 3;
 static const double EXPLORATION_BONUS = 10;
 static const double TIME_PENALTY = 1;
 static const double EXPLORATION_PENALTY = 100; 
@@ -124,7 +122,7 @@ double run_seconds(double seconds) {
   printf("Start run\n");
   int i, n = 1000.0 * seconds / time_step;
   for (i = 0; i < n; i++) {
-    if (demo && wb_keyboard_get_key() == 'O') {
+    if (demo ) {
       printf("Doing demo thing?\n");
       demo = false;
       return 60; // interrupt demo and start GA optimization
@@ -191,7 +189,7 @@ void evaluate_genotype(Genotype genotype) {
   wb_supervisor_field_set_sf_vec3f(robot_translation, robot_trans0);
   wb_supervisor_field_set_sf_rotation(robot_rotation, robot_rot0);
   
-  double time_taken = run_seconds(30.0);
+  double time_taken = run_seconds(6.0);
   
   // measure fitness
   double fitness = measure_fitness(time_taken);
@@ -206,7 +204,6 @@ void evaluate_genotype(Genotype genotype) {
 }
 
 void run_optimization() {
-  wb_keyboard_disable();
 
   printf("---\n");
   printf("starting GA optimization ...\n");
@@ -224,7 +221,7 @@ void run_optimization() {
 
     double best_fitness = genotype_get_fitness(population_get_fittest(population));
     double average_fitness = population_compute_average_fitness(population);
-
+    
     // display results
     plot_fitness(i, best_fitness, average_fitness);
     printf("best fitness: %g\n", best_fitness);
@@ -254,7 +251,6 @@ void run_optimization() {
 
 // show demo of the fittest individual
 void run_demo() {
-  wb_keyboard_enable(time_step);
 
   printf("---\n");
   printf("running demo of best individual ...\n");
