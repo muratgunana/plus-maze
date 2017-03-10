@@ -189,7 +189,7 @@ void evaluate_genotype(Genotype genotype) {
   wb_supervisor_field_set_sf_vec3f(robot_translation, robot_trans0);
   wb_supervisor_field_set_sf_rotation(robot_rotation, robot_rot0);
   
-  double time_taken = run_seconds(6.0);
+  double time_taken = run_seconds(15.0);
   
   // measure fitness
   double fitness = measure_fitness(time_taken);
