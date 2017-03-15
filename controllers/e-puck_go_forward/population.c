@@ -6,7 +6,7 @@
 #include <stdio.h>
 
 // part of the population that is cloned from one generation to the next
-static const double ELITE_PART = 0.1;
+static const double ELITE_PART = 0.01;
 
 struct _Population_ {
   Genotype *genotypes;  // genotypes
@@ -51,13 +51,13 @@ void population_reproduce(Population p) {
 
   // quick sort for rank selection
   qsort(p->genotypes, p->size, sizeof(Genotype), compare_genotype);
-
+  
   // create new generation
   Genotype *next_generation = malloc(p->size * sizeof(Genotype));
   int i;
   for (i = 0; i < p->size; i++) {
     Genotype child;
-
+    
     if (i < ELITE_PART * p->size) {
       // cloned elite
       child = genotype_clone(p->genotypes[i]);

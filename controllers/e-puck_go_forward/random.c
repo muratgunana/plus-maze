@@ -7,7 +7,7 @@ int random_get_integer(int max) {
 }
 
 double random_get_uniform() {
-  return (double)rand() / RAND_MAX;
+  return (double)((rand() % 2000000 - 1000000)/1000000.0f);
 }
 
 // polar form of the Box-Muller transformation

@@ -3,8 +3,8 @@ DEF WORLD WorldInfo {
   inkEvaporation 0.5
 }
 Viewpoint {
-  orientation 0.99336585 0.10267943 -0.051780445 5.0346833
-  position -0.38842172 3.3126531 1.7321666
+  orientation 0.99253282 0.11818058 -0.03019852 4.9519243
+  position -0.23526559 2.1557812 0.60064204
 }
 RectangleArena {
   translation 0 -5e-05 0
@@ -16,8 +16,19 @@ Background {
   ]
 }
 DEF ROBOT E-puck {
-  translation 0 0.01 0.54
-  controller "advanced_genetic_algorithm"
+  hidden linearVelocity_0 -1.16191e-09 1.25065e-05 2.36395e-17
+  hidden angularVelocity_0 1.57596e-15 -4.01146e-20 7.75643e-08
+  hidden translation_1 -0.026 0.020001183 0
+  hidden rotation_1 2.9203686e-07 -8.4025783e-11 -1 -1.7717891e-10
+  hidden linearVelocity_1 -1.55106e-09 1.25122e-05 3.1519e-17
+  hidden angularVelocity_1 1.57596e-15 -1.56458e-19 7.75663e-08
+  hidden translation_2 0.026 0.020001169 0
+  hidden rotation_2 1.0949711e-07 6.6544711e-11 1 1.7739932e-10
+  hidden linearVelocity_2 -1.5516e-09 1.25161e-05 3.15195e-17
+  hidden angularVelocity_2 1.57596e-15 -1.32376e-19 7.75663e-08
+  translation 1.6557537e-12 -5.9175937e-05 0.54
+  rotation -2.7694925e-11 9.7262617e-12 -1 -6.8172809e-06
+  controller "e-puck_go_forward"
   emitter_channel 2
   groundSensorsSlot [
     DEF PEN_L Pen {
@@ -30,19 +41,6 @@ DEF ROBOT E-puck {
       maxDistance 0.001
     }
   ]
-}
-DEF GA Supervisor {
-  translation 0.1 0 0.1
-  children [
-    Emitter {
-      channel 1
-    }
-    Display {
-      width 200
-      height 100
-    }
-  ]
-  controller "advanced_genetic_algorithm_supervisor"
 }
 Solid {
   translation -0.12 0.05 -0.35

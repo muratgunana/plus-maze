@@ -56,9 +56,9 @@ Genotype genotype_clone(Genotype g) {
 // mutate genes with given probability and deviation
 void genotype_mutate(Genotype g) {
   int i;
-  for (i = 0; i < genotype_size; i++)
-    if (random_get_uniform() < MUTATION_PROBABLITY)
-      g->genes[i] += random_get_gaussian() * MUTATION_DEVIATION;
+  //for (i = 0; i < genotype_size; i++)
+    //if (fabs(random_get_uniform()) < MUTATION_PROBABLITY)
+      //g->genes[i] = random_get_uniform();
 }
 
 // crossover
